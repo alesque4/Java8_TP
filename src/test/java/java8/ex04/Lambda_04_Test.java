@@ -129,17 +129,16 @@ public class Lambda_04_Test {
         // TODO créer un variable verifyAccount de type GenericMapper
         // TODO vérifier que chaque compte a un solde à 1000.
         // TODO vérifier que chaque titulaire de compte a un age > 50
-        // ??? verifyAccount = ???;
+        Processor<Account> verifyAccount = a -> {
+        	assert a.getBalance() == 1000;
+        	assert a.getOwner().getAge() > 50;
+        };
 
-        /* TODO Décommenter
+
         personFuncCollection
                 .filter(filterByAge)
                 .map(mapToAccount)
                 .forEach(verifyAccount);
-        */
-
-        // TODO A supprimer
-        assert false;
     }
     // end::test_filter_map_forEach_with_vars[]
 
