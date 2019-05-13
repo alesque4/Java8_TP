@@ -1,6 +1,8 @@
 package java8.ex01;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -17,8 +19,15 @@ public class Method_01_Test {
     interface IDao {
         List<Person> findAll();
 
-        // TODO créer une méthode int sumAge()
-        // TODO Cette méthode retourne le résultat de l'addition des ages des personnes
+        // créer une méthode int sumAge()
+        // Cette méthode retourne le résultat de l'addition des ages des personnes
+        default int sumAge() {
+        	Optional<Integer> sum = findAll().stream()
+        			.map(p -> p.getAge())
+        			.reduce((a1,a2) -> a1+a2);
+        	System.out.println("sum : "+sum.orElse(0));
+        	return sum.orElse(0);
+        }
     }
     // end::IDao[]
 
@@ -47,8 +56,9 @@ public class Method_01_Test {
 
         DaoA daoA = new DaoA();
 
-        // TODO invoquer la méthode sumAge pour que le test soit passant
+        // invoquer la méthode sumAge pour que le test soit passant
         int result = 0;
+        result = daoA.sumAge();
 
         assert result == 210;
     }
@@ -58,8 +68,9 @@ public class Method_01_Test {
 
         DaoB daoB = new DaoB();
 
-        // TODO invoquer la méthode sumAge pour que le test soit passant
+        // invoquer la méthode sumAge pour que le test soit passant
         int result = 0;
+        result = daoB.sumAge();
 
         assert result == 5050;
 
