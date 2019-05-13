@@ -25,7 +25,6 @@ public class Method_01_Test {
         	Optional<Integer> sum = findAll().stream()
         			.map(p -> p.getAge())
         			.reduce((a1,a2) -> a1+a2);
-        	System.out.println("sum : "+sum.orElse(0));
         	return sum.orElse(0);
         }
     }

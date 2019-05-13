@@ -1,6 +1,7 @@
 package java8.ex02;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -16,9 +17,10 @@ public class Method_02_Test {
     interface IDao {
         List<Person> findAll();
 
-        // TODO créer une méthode String format()
-        // TODO la méthode retourne une chaîne de la forme [<nb_personnes> persons]
-        // TODO exemple de résultat : "[14 persons]", "[30 persons]"
+        // créer une méthode String format()
+        // la méthode retourne une chaîne de la forme [<nb_personnes> persons]
+        // exemple de résultat : "[14 persons]", "[30 persons]"
+        public String format();
     }
     // end::IDao[]
 
@@ -32,10 +34,10 @@ public class Method_02_Test {
             return people;
         }
 
-        // TODO redéfinir la méthode String format()
-        // TODO la méthode retourne une chaîne de la forme DaoA[<nb_personnes> persons]
-        // TODO exemple de résultat : "DaoA[14 persons]", "DaoA[30 persons]"
-        // TODO l'implémentation réutilise la méthode format() de l'interface
+        public String format() {
+        	String res = "["+findAll().stream().collect(Collectors.counting())+" persons]";
+        	return res;
+        }
 
     }
     // end::DaoA[]
@@ -45,8 +47,8 @@ public class Method_02_Test {
 
         DaoA daoA = new DaoA();
 
-        // TODO invoquer la méthode format() pour que le test soit passant
-        String result = null;
+        // invoquer la méthode format() pour que le test soit passant
+        String result = daoA.format();
 
         "DaoA[20 persons]".equals(result);
     }
