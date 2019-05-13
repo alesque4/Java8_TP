@@ -3,11 +3,13 @@ package java8.ex05;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -36,6 +38,26 @@ public class Stream_05_Test {
             this.annee = annee;
             this.jour = jour;
             this.nombre = nombre;
+        }
+        
+        public Naissance(String line) {
+        	String[] data = line.split(";");
+        	boolean splitSuccess = data.length == 4;
+        	
+        	if(splitSuccess) {
+            	setAnnee(data[1]);
+            	setJour(data[2]);
+            	try {
+            		setNombre(Integer.valueOf(data[3]));
+            	}catch(Exception e){
+            		System.out.println(e.getMessage());
+            		splitSuccess = false;
+            	}
+        	}else if(!splitSuccess){
+        		setAnnee("1900");
+            	setJour("19000101");
+            	setNombre(0);
+        	}
         }
 
         public String getAnnee() {
@@ -69,12 +91,15 @@ public class Stream_05_Test {
 
         // TODO utiliser la méthode java.nio.file.Files.lines pour créer un stream de lignes du fichier naissances_depuis_1900.csv
         // Le bloc try(...) permet de fermer (close()) le stream après utilisation
-        try (Stream<String> lines = null) {
+        try (Stream<String> lines = Files.lines(FileSystems.getDefault().getPath("", NAISSANCES_DEPUIS_1900_CSV))) {
 
             // TODO construire une MAP (clé = année de naissance, valeur = somme des nombres de naissance de l'année)
-            Map<String, Integer> result = null;
+            Map<String, Integer> result = lines
+            		.map(l -> new Naissance(l))
+            		.collect(Collectors.groupingBy(n -> n.getAnnee(),
+            				Collectors.summingInt(n -> n.getNombre())));
 
-
+            lines.close();
             assertThat(result.get("2015"), is(8097));
             assertThat(result.get("1900"), is(5130));
         }

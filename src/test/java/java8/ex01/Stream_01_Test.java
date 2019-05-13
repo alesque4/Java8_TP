@@ -5,7 +5,6 @@ import java8.data.domain.Order;
 import java8.data.domain.Pizza;
 import org.junit.Test;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
