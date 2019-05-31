@@ -2,19 +2,20 @@ package java8.ex05;
 
 import org.junit.Test;
 
+import java8.data.Data;
+import java8.data.domain.Pizza;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -90,20 +91,6 @@ public class Stream_05_Test {
             this.nombre = nombre;
         }
     }
-    
-    @Test
-    public void test() throws IOException {
-    	 try {
-    		 Stream<String> lines = Files.lines(FileSystems.getDefault().getPath("", NAISSANCES_DEPUIS_1900_CSV));
-    		 
-    		 lines.map(l -> new Naissance(l))
-    		 .filter(n -> Integer.parseInt(n.getAnnee()) < 1902)
-    			.forEach(n -> System.out.println(n.toString()));
-    	 }catch(Exception e) {
-    		 System.out.println(e.getMessage());
-    	 }
-    }
-
 
     @Test
     public void test_group() throws IOException {
@@ -150,7 +137,14 @@ public class Stream_05_Test {
 
             // TODO construire une MAP (clé = année de naissance, valeur = maximum de nombre de naissances)
             // TODO utiliser la méthode "collectingAndThen" à la suite d'un "grouping"
-            Map<String, Naissance> result = null;
+            Map<String, Naissance> result = lines
+            		.map(Naissance::new)
+            		.collect(Collectors.groupingBy(
+            				Naissance::getAnnee,
+            				Collectors.collectingAndThen(
+            						Collectors.maxBy(Comparator.comparingInt(Naissance::getNombre)),
+            						o -> o.orElse(new Naissance("1900","19000101",0))))
+            				);
             				
             		
 
@@ -164,16 +158,63 @@ public class Stream_05_Test {
         }
     }
 
+    //Créations des pizzas pour le test suivant
+    public void create_pizzas() throws IOException {
+    	List<Pizza> listPizzas = new Data().getPizzas();
+    	String extension = ".txt";
+    	final Path PATH_DATA = FileSystems.getDefault().getPath(DATA_DIR);
+    	
+    	//Si le dossier pour les pizzas n'existe pas, on le crée
+    	if(Files.notExists(PATH_DATA)) {
+    		Files.createDirectory(PATH_DATA);
+    	}
+    	
+    	listPizzas.stream().forEach(
+    			p -> {
+    					FileWriter writer = null;
+						try {
+							writer = new FileWriter(DATA_DIR+"/"+p.getId()+extension, false);
+							writer.write(p.getName()+":"+p.getPrice());
+	    					writer.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+    			});
+    }
+    
     // Des données figurent dans le répertoire pizza-data
     // TODO explorer les fichiers pour voir leur forme
     // TODO compléter le test
 
     @Test
     public void test_pizzaData() throws IOException {
+    	create_pizzas();
         // TODO utiliser la méthode java.nio.file.Files.list pour parcourir un répertoire
 
         // TODO trouver la pizza la moins chère
-        String pizzaNamePriceMin = null;
+        String pizzaNamePriceMin = Files.list(FileSystems.getDefault().getPath(DATA_DIR))
+        		//On récupère une ligne dans chaque fichier
+        		.map(path -> {
+					try {
+						return Files.lines(path).findFirst().orElse("NaP:"+Integer.MAX_VALUE);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return "NaP:"+Integer.MAX_VALUE;
+				})
+        		//On parse les lignes
+        		.map(s -> {
+        			String nom = "";
+        			Integer prix = Integer.MAX_VALUE;
+        			String[] split = s.split(":");
+        			nom = split[0];
+        			prix = Integer.parseInt(split[1]);
+        			return new Pizza(0, nom, prix);
+        		})
+        		.min(Comparator.comparingInt(Pizza::getPrice))
+        		.orElse(new Pizza(0, "NaP", Integer.MAX_VALUE))
+        		.getName();
 
         assertThat(pizzaNamePriceMin, is("L'indienne"));
 
